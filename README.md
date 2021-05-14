@@ -6,7 +6,7 @@ The json looks like:<br />
 ```
 {
   "name":"Name of the File",
-  "size":sizr,
+  "size":size,
   "date_created":"Original file creation date and time(UTC)",
   "ipfs_hash":"hash of the file on IPFS",
   "ipfs_link":"the ipfs link to the file(after appending the hash)"
