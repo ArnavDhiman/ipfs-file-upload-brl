@@ -36,3 +36,23 @@
     transform: rotate(360deg);
   }
 }
+.wait-spinner{  
+  margin-left: 12px;
+}
+.img-thumbnail{
+  max-width: 250px !important;
+}
+.text-elipse{
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100px;
+}
+.file-meta{
+  margin-top: 1.5em;
+}
+.modal-content{
+  background-color: transparent !important;
+  border: none !important;
+  text-align: center;
+}
