@@ -22,10 +22,9 @@ class App extends Component {
     this.onDrop = this.onDrop.bind(this);
     this.handleJson = this.handleJson.bind(this);
     this.downloadFileHandler = this.downloadFileHandler.bind(this);
+    this.mintNFTHandler = this.mintNFTHandler.bind(this);
   }
-  componentWillUnmount() {
 
-  }
   handleUpload(event) {
     event.preventDefault();
     this.loadingShow();
@@ -34,7 +33,6 @@ class App extends Component {
         console.error(error);
         return
       }
-      // console.log("IPFS Hash = ", result[0]);
       this.setState(prevState => {
         return {
           image: prevState.image,
@@ -73,7 +71,7 @@ class App extends Component {
       'size': this.state.image[0].size,
       'date_created': new Date(this.state.image[0].lastModified).toUTCString(),
       'ipfs_hash': this.state.ipfs_hash,
-      'ipfs_link': `https://ipfs.io/ipfs/${this.state.ipfs_hash}`,
+      'image': `https://ipfs.io/ipfs/${this.state.ipfs_hash}`,
     }
     this.setState(prevState => {
       return {
@@ -110,7 +108,36 @@ class App extends Component {
       }
     });
   }
+  mintNFTHandler(event){
+    event.preventDefault();
+    this.loadingShow();
+    const jsonData = this.state.upload_json;
+    const json = JSON.stringify(jsonData);
+    console.log(json);
+    const buff = new Buffer.from(json);
 
+    let fileHash = null;
+    ipfs.add(buff, (error, result) => {
+      if (error) {
+        console.error(error);        
+      }
+      else{
+        fileHash = result[0].hash;
+        console.log("FileHash -> ", fileHash);
+      }
+    });
+    if(fileHash){
+      this.mintRequestHandler(fileHash)
+    }
+    this.loadingHide();
+  }
+  mintRequestHandler(fileHash){
+    const data = {
+      "file_hash" : fileHash,
+      "file_link" : `https://ipfs.io/ipfs/${fileHash}`
+    }
+    console.log(data)
+  }
   async downloadFileHandler() {
     const jsonData = this.state.upload_json;
     const fileName = jsonData.name;
@@ -145,6 +172,9 @@ class App extends Component {
           <td>
             Download
           </td>
+          <td>
+            Mint NFT
+          </td>
           </tr>
         </thead>
         <tbody>
@@ -164,6 +194,9 @@ class App extends Component {
             <td>
                 <Button variant="light" onClick={this.downloadFileHandler}>Download JSON</Button> 
             </td>
+            <td>
+                <Button variant="light" onClick={this.mintNFTHandler}>MINT NFT</Button> 
+            </td>
           </tr>
         </tbody>
       </Table>
@@ -176,7 +209,7 @@ class App extends Component {
             IPFS File Uploader
           </Navbar.Brand>
         </Navbar>
-        <Container>
+        <Container fluid>
           <br></br>
           <Row>
             <Col className="text-center">
