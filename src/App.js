@@ -16,12 +16,14 @@ class App extends Component {
       ipfs_hash: "",
       upload_json: null,
       show:false,
+      mintStatus:null,
       
     }
     this.handleUpload = this.handleUpload.bind(this);
     this.onDrop = this.onDrop.bind(this);
     this.handleJson = this.handleJson.bind(this);
     this.downloadFileHandler = this.downloadFileHandler.bind(this);
+    this.mintRequestHandler = this.mintRequestHandler.bind(this);
     this.mintNFTHandler = this.mintNFTHandler.bind(this);
   }
 
@@ -41,6 +43,7 @@ class App extends Component {
           upload_json: prevState.upload_json,
           ipfs_hash: result[0].hash,
           show:prevState.show,
+          mintStatus:prevState.mintStatus,
         }
       });
       this.handleJson();
@@ -60,18 +63,25 @@ class App extends Component {
           upload_json: prevState.upload_json,
           ipfs_hash: prevState.ipfs_hash,
           show:prevState.show,
+          mintStatus:prevState.mintStatus,
         }
       })
     }
   }
   handleJson() {
+  
     let jsonFileInfo;
     jsonFileInfo = {
+      "attributes" : [ {
+        'size': this.state.image[0].size,
+      }, {
+        'date_created': new Date(this.state.image[0].lastModified).toUTCString(),
+      },{
+        'ipfs_hash': this.state.ipfs_hash,
+      } ],
+      "description":"Test NFT for BRL",
       'name': this.state.image[0].name.split(".")[0],
-      'size': this.state.image[0].size,
-      'date_created': new Date(this.state.image[0].lastModified).toUTCString(),
-      'ipfs_hash': this.state.ipfs_hash,
-      'image': `https://ipfs.io/ipfs/${this.state.ipfs_hash}`,
+      "image": `https://ipfs.io/ipfs/${this.state.ipfs_hash}`,
     }
     this.setState(prevState => {
       return {
@@ -81,6 +91,7 @@ class App extends Component {
         upload_json: jsonFileInfo,
         ipfs_hash: prevState.ipfs_hash,
         show:prevState.show,
+        mintStatus:prevState.mintStatus,
       }
     });
   }
@@ -93,6 +104,7 @@ class App extends Component {
         upload_json: prevState.upload_json,
         ipfs_hash: prevState.ipfs_hash,
         show:true,
+        mintStatus:prevState.mintStatus,
       }
     });
   }
@@ -105,38 +117,61 @@ class App extends Component {
         upload_json: prevState.upload_json,
         ipfs_hash: prevState.ipfs_hash,
         show:false,
+        mintStatus:prevState.mintStatus,
       }
     });
   }
-  mintNFTHandler(event){
-    event.preventDefault();
+  async mintNFTHandler(){
     this.loadingShow();
     const jsonData = this.state.upload_json;
     const json = JSON.stringify(jsonData);
-    console.log(json);
-    const buff = new Buffer.from(json);
-
-    let fileHash = null;
-    ipfs.add(buff, (error, result) => {
+    const buff = new Buffer.from(json);    
+    await ipfs.files.add(buff, (error, result) => {
       if (error) {
         console.error(error);        
       }
       else{
-        fileHash = result[0].hash;
-        console.log("FileHash -> ", fileHash);
+        console.log("Meta file result = ",result);
+        console.log('link:= ',`https://ipfs.io/ipfs/${result[0].hash}`)        
+        this.mintRequestHandler(result[0].hash);        
       }
     });
-    if(fileHash){
-      this.mintRequestHandler(fileHash)
-    }
-    this.loadingHide();
+    
   }
-  mintRequestHandler(fileHash){
+  async mintRequestHandler(fileHash){
     const data = {
       "file_hash" : fileHash,
       "file_link" : `https://ipfs.io/ipfs/${fileHash}`
-    }
-    console.log(data)
+    };
+    console.log("Minter Data = ",data);
+  
+    const url = "http://localhost:9000/mint";
+    const reqMeta = {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    };
+    fetch(url, reqMeta).then(
+      this.setState(prevState => {
+        return {
+          image: prevState.image,
+          buffer: prevState.buffer,
+          upload_result: prevState.upload_result,
+          upload_json: prevState.upload_json,
+          ipfs_hash: prevState.ipfs_hash,
+          show:prevState.show,
+          mintStatus:"Check Alchamey dashboard for the status of txn.",
+        }
+      })
+    );
+    // const respJson = await response.json();
+
+    
+    
+    console.log("changed state = ", this.state)
+    this.loadingHide();
   }
   async downloadFileHandler() {
     const jsonData = this.state.upload_json;
@@ -162,13 +197,8 @@ class App extends Component {
           </td>
             <td>
               File Size
-          </td>
-            <td>
-              Date Created
-          </td>
-            <td>
-              IPFS Hash
-          </td>
+          </td>          
+          
           <td>
             Download
           </td>
@@ -183,14 +213,9 @@ class App extends Component {
               {this.state.upload_json.name}
             </td>
             <td>
-              {this.state.upload_json.size}
-            </td>
-            <td>
-              {this.state.upload_json.date_created}
-            </td>
-            <td className="text-elipse">
-              {this.state.upload_json.ipfs_hash}
-            </td>
+              {this.state.upload_json.attributes[0].size}
+            </td>         
+          
             <td>
                 <Button variant="light" onClick={this.downloadFileHandler}>Download JSON</Button> 
             </td>
@@ -235,6 +260,14 @@ class App extends Component {
             <Col className="upladed-image">
               {this.state.ipfs_hash ? <Image className="img-thumbnail" thumbnail src={`https://ipfs.io/ipfs/${this.state.ipfs_hash}`}></Image> : <p></p>}
             </Col> 
+          </Row>
+        </Container>
+        <Container>
+          <Row>
+            <Col>
+              {this.state.mintStatus ? <p>{this.state.mintStatus}</p> : <p></p>}
+            </Col>
+
           </Row>
         </Container>
       </div>
