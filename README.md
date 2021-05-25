@@ -1,15 +1,15 @@
 ### AIM
-The aim of this application is to let the user upload an image to the IPFS and return the hash.<br />
+The aim of this application is to let the user upload an image to the IPFS, return the hash and mint an NFT using the retured IPFS hash.<br />
 The hash is displayed after the image is upload and can be downloaded in a json format.<br />
 <br /><br />
 The json looks like:<br />
 ```
 {
-  "name":"Name of the File",
-  "size":size,
-  "date_created":"Original file creation date and time(UTC)",
-  "ipfs_hash":"hash of the file on IPFS",
-  "ipfs_link":"the ipfs link to the file(after appending the hash)"
+  "attributes":
+  [{"size":size},{"date_created":"date_created"},{"ipfs_hash":"ipfs_hash"}],
+  "description":"image description",
+  "name":"image name",
+  "image":"ipfs hash link to the file"
 }
 ```
 <br /><br />
