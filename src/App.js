@@ -68,8 +68,7 @@ class App extends Component {
       })
     }
   }
-  handleJson() {
-  
+  handleJson() {  
     let jsonFileInfo;
     jsonFileInfo = {
       "attributes" : [ {
@@ -131,8 +130,8 @@ class App extends Component {
         console.error(error);        
       }
       else{
-        console.log("Meta file result = ",result);
-        console.log('link:= ',`https://ipfs.io/ipfs/${result[0].hash}`)        
+        // console.log("Meta file result = ",result);
+        // console.log('link:= ',`https://ipfs.io/ipfs/${result[0].hash}`)        
         this.mintRequestHandler(result[0].hash);        
       }
     });
@@ -143,8 +142,8 @@ class App extends Component {
       "file_hash" : fileHash,
       "file_link" : `https://ipfs.io/ipfs/${fileHash}`
     };
-    console.log("Minter Data = ",data);
-  
+    // console.log("Minter Data = ",data);
+    // LINK TO THE REACT APP
     const url = "http://localhost:9000/mint";
     const reqMeta = {
       method: 'POST',
@@ -166,10 +165,6 @@ class App extends Component {
         }
       })
     );
-    // const respJson = await response.json();
-
-    
-    
     console.log("changed state = ", this.state)
     this.loadingHide();
   }
@@ -234,7 +229,7 @@ class App extends Component {
             IPFS File Uploader
           </Navbar.Brand>
         </Navbar>
-        <Container fluid>
+        <Container>
           <br></br>
           <Row>
             <Col className="text-center">
